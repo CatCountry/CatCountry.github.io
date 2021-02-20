@@ -324,8 +324,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/leetcode-N%E6%95%B0%E4%B9%8B%E5%92%8C/">
-                                <span class="chip bg-color">leetcode N数之和</span>
+                            <a href="/tags/leetcode/">
+                                <span class="chip bg-color">leetcode</span>
+                            </a>
+                        
+                            <a href="/tags/N%E6%95%B0%E4%B9%8B%E5%92%8C/">
+                                <span class="chip bg-color">N数之和</span>
                             </a>
                         
                     </div>
@@ -387,7 +391,7 @@
 <p>限制<br>2 &lt;= nums.length &lt;= 103<br>-109 &lt;= nums[i] &lt;= 109<br>-109 &lt;= target &lt;= 109<br>只会存在一个有效答案 </p>
 <h3 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h3><h4 id="1-暴力建立"><a href="#1-暴力建立" class="headerlink" title="1. 暴力建立"></a>1. 暴力建立</h4><p>暴力遍历是最容易想到的方案，整体时间复杂度是O（n^2）。<br>代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] twoSum(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target) &#123;</span><br><span class="line">    <span class="keyword">int</span>[] results = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">        <span class="keyword">int</span> j = i + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (j &lt; nums.length) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] + nums[j] == target) &#123;</span><br><span class="line">                results[<span class="number">0</span>] = i;</span><br><span class="line">                results[<span class="number">1</span>] = j;</span><br><span class="line">                <span class="keyword">return</span> results;</span><br><span class="line">            &#125;</span><br><span class="line">            j ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> results;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="2-哈希映射"><a href="#2-哈希映射" class="headerlink" title="2. 哈希映射"></a>2. 哈希映射</h3><p>将数组的值和index建立映射(时间复杂度为O(n))，然后遍历数组寻找<code>target - arr[i]</code>只需要O(1)的时间复杂度就可以找到是否存在另外的一个元素.<br>所以整体的时间复杂度为O(n);</p>
+<h4 id="2-哈希映射"><a href="#2-哈希映射" class="headerlink" title="2. 哈希映射"></a>2. 哈希映射</h4><p>将数组的值和index建立映射(时间复杂度为O(n))，然后遍历数组寻找<code>target - arr[i]</code>只需要O(1)的时间复杂度就可以找到是否存在另外的一个元素.<br>所以整体的时间复杂度为O(n);</p>
 <p>代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">int</span>[] twoSum(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target) &#123;</span><br><span class="line">    <span class="keyword">int</span>[] results = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line">    Map&lt;Integer, Integer&gt; valueIndexMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">        valueIndexMap.put(nums[i], i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">        Integer value = valueIndexMap.get(target - nums[i]);</span><br><span class="line">        <span class="keyword">if</span> (value != <span class="keyword">null</span> &amp;&amp; value != i) &#123;</span><br><span class="line">            results[<span class="number">0</span>] = i;</span><br><span class="line">            results[<span class="number">1</span>] = value;</span><br><span class="line">            <span class="keyword">return</span> results;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> results;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
                 
@@ -453,8 +457,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/leetcode-N%E6%95%B0%E4%B9%8B%E5%92%8C/">
-                                    <span class="chip bg-color">leetcode N数之和</span>
+                                <a href="/tags/leetcode/">
+                                    <span class="chip bg-color">leetcode</span>
+                                </a>
+                            
+                                <a href="/tags/N%E6%95%B0%E4%B9%8B%E5%92%8C/">
+                                    <span class="chip bg-color">N数之和</span>
                                 </a>
                             
                         </div>
@@ -533,8 +541,12 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/leetcode-N%E6%95%B0%E4%B9%8B%E5%92%8C/">
-                        <span class="chip bg-color">leetcode N数之和</span>
+                    <a href="/tags/leetcode/">
+                        <span class="chip bg-color">leetcode</span>
+                    </a>
+                    
+                    <a href="/tags/N%E6%95%B0%E4%B9%8B%E5%92%8C/">
+                        <span class="chip bg-color">N数之和</span>
                     </a>
                     
                 </div>
