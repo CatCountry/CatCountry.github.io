@@ -29,7 +29,7 @@
 
     <script src="/libs/jquery/jquery.min.js"></script>
 
-<meta name="generator" content="Hexo 5.3.0"></head>
+<meta name="generator" content="Hexo 5.3.0"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
 
 
 
@@ -367,14 +367,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.7k
+                    1k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    8 分
+                    4 分
                 </div>
                 
 
@@ -389,9 +389,6 @@
         <hr class="clearfix">
 
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="/libs/prism/prism.css">
-        
 
         
 
@@ -402,13 +399,13 @@
 <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>首先在多线程环境下，会出现<code>读-写</code>、<code>读-读</code>和<code>写-写</code>操作冲突。</p>
 <p>其次对于<code>Map</code>中的常用API：</p>
 <p>写:</p>
-<pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
+<pre class=" language-Java"><code class="language-Java">&#123;
     V put(K key, V value);
 
     V remove(Object key);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#125;</code></pre>
 <p>读：</p>
-<pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
+<pre class=" language-Java"><code class="language-Java">&#123;
     int size();
 
     boolean isEmpty();
@@ -417,12 +414,12 @@
 
     V get(Object key);
 
-    Set&lt;K&gt; keySet();
+    Set<K> keySet();
 
-    Set&lt;Map.Entry&lt;K, V&gt;&gt; entrySet();
+    Set<Map.Entry<K, V>> entrySet();
 
-    Collection&lt;V&gt; values();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    Collection<V> values();
+&#125;</code></pre>
 <p>这些API中大致可以了解到<code>ConcurrentHashMap</code>需要维护三类数据的同步</p>
 <ol>
 <li>size</li>
@@ -431,20 +428,20 @@
 </ol>
 <p>接下来我们一个一个讨论。</p>
 <h2 id="size"><a href="#size" class="headerlink" title="size"></a>size</h2><p>可以先看下<code>ConcurrentHashMap</code>的关于数量的成员变量：</p>
-<pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
-    &#x2F;&#x2F;基础计数器 volatile
+<pre class=" language-Java"><code class="language-Java">&#123;
+    //基础计数器 volatile
     private transient volatile long baseCount;
-    &#x2F;&#x2F;lockObject volatile
+    //lockObject volatile
     private transient volatile int cellsBusy;
-    &#x2F;&#x2F;出现冲突后的计数器 volatile
+    //出现冲突后的计数器 volatile
     private transient volatile CounterCell[] counterCells;
 
     @sun.misc.Contended 
     static final class CounterCell &#123;
         volatile long value;
-        CounterCell(long x) &#123; value &#x3D; x; &#125;
+        CounterCell(long x) &#123; value = x; &#125;
     &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#125;</code></pre>
 <p>计数总体上是依靠<code>CAS</code>完成数据的更新。</p>
 <ol>
 <li>首先更新<code>baseCount</code></li>
@@ -452,145 +449,145 @@
 <li>获取Map中元素数量时，返回<code>baseCount</code>和<code>countCells[]</code>的总和；</li>
 </ol>
 <h3 id="size增加的情况"><a href="#size增加的情况" class="headerlink" title="size增加的情况"></a>size增加的情况</h3><p>通过<code>put()</code>增加元素</p>
-<pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
+<pre class=" language-Java"><code class="language-Java">&#123;
     public V put(K key, V value) &#123;
         return putVal(key, value, false);
     &#125;
 
     final V putVal(K key, V value, boolean onlyIfAbsent) &#123;
-        &#x2F;&#x2F;**********
-        &#x2F;&#x2F;先忽略其他代码
-        &#x2F;&#x2F;下面的方法会将总数量+1， binCount和扩容有关，可以先忽略
+        //**********
+        //先忽略其他代码
+        //下面的方法会将总数量+1， binCount和扩容有关，可以先忽略
         addCount(1L, binCount);
         return null;
     &#125;
 
     private final void addCount(long x, int check) &#123;
         CounterCell[] as; long b, s;
-        if ((as &#x3D; counterCells) !&#x3D; null ||
-            !U.compareAndSwapLong(this, BASECOUNT, b &#x3D; baseCount, s &#x3D; b + x)) &#123;
-            &#x2F;&#x2F;1.counterCells已经初始化
-            &#x2F;&#x2F;2.更新baseCount失败（发送冲突）
-            &#x2F;&#x2F;上面任何一种情况发生，都会进入到这里 
+        if ((as = counterCells) != null ||
+            !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) &#123;
+            //1.counterCells已经初始化
+            //2.更新baseCount失败（发送冲突）
+            //上面任何一种情况发生，都会进入到这里 
             CounterCell a; long v; int m;
-            boolean uncontended &#x3D; true;
-            &#x2F;&#x2F; ThreadLocalRandom.getProbe() 获取线程的随机数，用于分散锁冲突
-            if (as &#x3D;&#x3D; null || (m &#x3D; as.length - 1) &lt; 0 ||
-                (a &#x3D; as[ThreadLocalRandom.getProbe() &amp; m]) &#x3D;&#x3D; null ||
-                !(uncontended &#x3D; U.compareAndSwapLong(a, CELLVALUE, v &#x3D; a.value, v + x))) &#123;
-                &#x2F;&#x2F; 发生下面的情况
-                &#x2F;&#x2F;1.counterCells未初始化
-                &#x2F;&#x2F;2.counterCells[index] 没有初始化
-                &#x2F;&#x2F;3.counterCells[index] 更新失败
+            boolean uncontended = true;
+            // ThreadLocalRandom.getProbe() 获取线程的随机数，用于分散锁冲突
+            if (as == null || (m = as.length - 1) < 0 ||
+                (a = as[ThreadLocalRandom.getProbe() & m]) == null ||
+                !(uncontended = U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) &#123;
+                // 发生下面的情况
+                //1.counterCells未初始化
+                //2.counterCells[index] 没有初始化
+                //3.counterCells[index] 更新失败
                 fullAddCount(x, uncontended);
                 return;
             &#125;
-            if (check &lt;&#x3D; 1)
+            if (check <= 1)
                 return;
-            s &#x3D; sumCount();
+            s = sumCount();
         &#125;
-        if (check &gt;&#x3D; 0) &#123;
-            &#x2F;&#x2F;扩容逻辑，先暂时忽略
+        if (check >= 0) &#123;
+            //扩容逻辑，先暂时忽略
         &#125;
     &#125;
 
     private final void fullAddCount(long x, boolean wasUncontended) &#123;
         int h;
-        if ((h &#x3D; ThreadLocalRandom.getProbe()) &#x3D;&#x3D; 0) &#123;
-            &#x2F;&#x2F;当前线程的随机数还没有初始化
-            &#x2F;&#x2F;进行初始化
-            ThreadLocalRandom.localInit();      &#x2F;&#x2F; force initialization
-            h &#x3D; ThreadLocalRandom.getProbe();
-            wasUncontended &#x3D; true;
+        if ((h = ThreadLocalRandom.getProbe()) == 0) &#123;
+            //当前线程的随机数还没有初始化
+            //进行初始化
+            ThreadLocalRandom.localInit();      // force initialization
+            h = ThreadLocalRandom.getProbe();
+            wasUncontended = true;
         &#125;
-        boolean collide &#x3D; false;                &#x2F;&#x2F; True if last slot nonempty
+        boolean collide = false;                // True if last slot nonempty
         for (;;) &#123;
             CounterCell[] as; CounterCell a; int n; long v;
-            if ((as &#x3D; counterCells) !&#x3D; null &amp;&amp; (n &#x3D; as.length) &gt; 0) &#123;
-                &#x2F;&#x2F;counterCells[] 已经初始化
-                if ((a &#x3D; as[(n - 1) &amp; h]) &#x3D;&#x3D; null) &#123;
-                    &#x2F;&#x2F; counterCells[index]没有初始化
-                    if (cellsBusy &#x3D;&#x3D; 0) &#123;            &#x2F;&#x2F; Try to attach new Cell
-                        CounterCell r &#x3D; new CounterCell(x); &#x2F;&#x2F; Optimistic create
-                        if (cellsBusy &#x3D;&#x3D; 0 &amp;&amp; U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                            &#x2F;&#x2F; 只有拿到了cellsBusy的锁(CAS)才能进入这里
-                            boolean created &#x3D; false;
-                            try &#123;               &#x2F;&#x2F; Recheck under lock
+            if ((as = counterCells) != null && (n = as.length) > 0) &#123;
+                //counterCells[] 已经初始化
+                if ((a = as[(n - 1) & h]) == null) &#123;
+                    // counterCells[index]没有初始化
+                    if (cellsBusy == 0) &#123;            // Try to attach new Cell
+                        CounterCell r = new CounterCell(x); // Optimistic create
+                        if (cellsBusy == 0 && U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
+                            // 只有拿到了cellsBusy的锁(CAS)才能进入这里
+                            boolean created = false;
+                            try &#123;               // Recheck under lock
                                 CounterCell[] rs; int m, j;
-                                &#x2F;&#x2F; 针对counterCells[index]没有初始化，创建新的CounterCell
-                                if ((rs &#x3D; counterCells) !&#x3D; null &amp;&amp;
-                                    (m &#x3D; rs.length) &gt; 0 &amp;&amp;
-                                    rs[j &#x3D; (m - 1) &amp; h] &#x3D;&#x3D; null) &#123;
-                                    rs[j] &#x3D; r;
-                                    created &#x3D; true;
+                                // 针对counterCells[index]没有初始化，创建新的CounterCell
+                                if ((rs = counterCells) != null &&
+                                    (m = rs.length) > 0 &&
+                                    rs[j = (m - 1) & h] == null) &#123;
+                                    rs[j] = r;
+                                    created = true;
                                 &#125;
                             &#125; finally &#123;
-                                &#x2F;&#x2F;创建成功，是否锁
-                                cellsBusy &#x3D; 0;
+                                //创建成功，是否锁
+                                cellsBusy = 0;
                             &#125;
                             if (created)
                                 break;
-                            &#x2F;&#x2F;竞争cellsBusy锁失败，重试
-                            continue;           &#x2F;&#x2F; Slot is now non-empty
+                            //竞争cellsBusy锁失败，重试
+                            continue;           // Slot is now non-empty
                         &#125;
                     &#125;
-                    collide &#x3D; false;
+                    collide = false;
                 &#125;
-                &#x2F;&#x2F;CAS失败，第一次肯定会跳过
-                else if (!wasUncontended)       &#x2F;&#x2F; CAS already known to fail
-                    wasUncontended &#x3D; true;      &#x2F;&#x2F; Continue after rehash
-                &#x2F;&#x2F;直接尝试在counterCells[index]增加数量
-                else if (U.compareAndSwapLong(a, CELLVALUE, v &#x3D; a.value, v + x))
+                //CAS失败，第一次肯定会跳过
+                else if (!wasUncontended)       // CAS already known to fail
+                    wasUncontended = true;      // Continue after rehash
+                //直接尝试在counterCells[index]增加数量
+                else if (U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))
                     break;
-                &#x2F;&#x2F;更新counterCells[index]失败，说明又出现了冲突
-                else if (counterCells !&#x3D; as || n &gt;&#x3D; NCPU)、
-                    &#x2F;&#x2F;如果counterCells扩容过 或者 counterCells数量大于CPU数量，则认为不需要扩容了
-                    collide &#x3D; false;            &#x2F;&#x2F; At max size or stale
+                //更新counterCells[index]失败，说明又出现了冲突
+                else if (counterCells != as || n >= NCPU)、
+                    //如果counterCells扩容过 或者 counterCells数量大于CPU数量，则认为不需要扩容了
+                    collide = false;            // At max size or stale
                 else if (!collide)
-                     &#x2F;&#x2F;到了这一步说明需要继续扩容counterCells
-                    collide &#x3D; true;
-                else if (cellsBusy &#x3D;&#x3D; 0 &amp;&amp;
+                     //到了这一步说明需要继续扩容counterCells
+                    collide = true;
+                else if (cellsBusy == 0 &&
                          U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                    &#x2F;&#x2F;对counterCells进行扩容，需要拿到CELLSBUSY的锁
+                    //对counterCells进行扩容，需要拿到CELLSBUSY的锁
                     try &#123;
-                        if (counterCells &#x3D;&#x3D; as) &#123;&#x2F;&#x2F; Expand table unless stale
-                            CounterCell[] rs &#x3D; new CounterCell[n &lt;&lt; 1];
-                            for (int i &#x3D; 0; i &lt; n; ++i)
-                                rs[i] &#x3D; as[i];
-                            counterCells &#x3D; rs;
+                        if (counterCells == as) &#123;// Expand table unless stale
+                            CounterCell[] rs = new CounterCell[n << 1];
+                            for (int i = 0; i < n; ++i)
+                                rs[i] = as[i];
+                            counterCells = rs;
                         &#125;
                     &#125; finally &#123;
-                        cellsBusy &#x3D; 0;
+                        cellsBusy = 0;
                     &#125;
-                    collide &#x3D; false;
-                    continue;                   &#x2F;&#x2F; Retry with expanded table
+                    collide = false;
+                    continue;                   // Retry with expanded table
                 &#125;
-                &#x2F;&#x2F;重新设置线程的随机数
-                h &#x3D; ThreadLocalRandom.advanceProbe(h);
+                //重新设置线程的随机数
+                h = ThreadLocalRandom.advanceProbe(h);
             &#125;
-            else if (cellsBusy &#x3D;&#x3D; 0 &amp;&amp; counterCells &#x3D;&#x3D; as &amp;&amp;
+            else if (cellsBusy == 0 && counterCells == as &&
                      U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                &#x2F;&#x2F;counterCells[] 没有初始化，进行初始化
-                boolean init &#x3D; false;
-                try &#123;                           &#x2F;&#x2F; Initialize table
-                    if (counterCells &#x3D;&#x3D; as) &#123;
-                        CounterCell[] rs &#x3D; new CounterCell[2];
-                        rs[h &amp; 1] &#x3D; new CounterCell(x);
-                        counterCells &#x3D; rs;
-                        init &#x3D; true;
+                //counterCells[] 没有初始化，进行初始化
+                boolean init = false;
+                try &#123;                           // Initialize table
+                    if (counterCells == as) &#123;
+                        CounterCell[] rs = new CounterCell[2];
+                        rs[h & 1] = new CounterCell(x);
+                        counterCells = rs;
+                        init = true;
                     &#125;
                 &#125; finally &#123;
-                    cellsBusy &#x3D; 0;
+                    cellsBusy = 0;
                 &#125;
                 if (init)
                     break;
             &#125;
-            &#x2F;&#x2F;如果都失败了，则回退到更新 BASECOUNT
-            else if (U.compareAndSwapLong(this, BASECOUNT, v &#x3D; baseCount, v + x))
-                break;                          &#x2F;&#x2F; Fall back on using base
+            //如果都失败了，则回退到更新 BASECOUNT
+            else if (U.compareAndSwapLong(this, BASECOUNT, v = baseCount, v + x))
+                break;                          // Fall back on using base
         &#125;
     &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#125;</code></pre>
 <p>上面的代码还是比较简单的，</p>
 <ul>
 <li>首先通过<code>CAS</code>更新<code>baseCount</code>的值,如果</li>
@@ -644,39 +641,39 @@
 </ul>
 <p>在这里<code>cellsBusy</code>的作用是用于初始化和创建CounterCell的锁</p>
 <h3 id="size减少的情况"><a href="#size减少的情况" class="headerlink" title="size减少的情况"></a>size减少的情况</h3><p>通过<code>remove()</code>移除元素</p>
-<pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
+<pre class=" language-Java"><code class="language-Java">&#123;
     public V remove(Object key) &#123;
         return replaceNode(key, null, null);
     &#125;
 
     final V replaceNode(Object key, V value, Object cv) &#123;
-        &#x2F;&#x2F;******
-        &#x2F;&#x2F;忽略其他代码
-        &#x2F;&#x2F;移除元素的逻辑和👆上面是一致的
+        //******
+        //忽略其他代码
+        //移除元素的逻辑和👆上面是一致的
         addCount(-1L, -1);
-        &#x2F;&#x2F;******
+        //******
     &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="size计算"><a href="#size计算" class="headerlink" title="size计算"></a>size计算</h3><pre class="line-numbers language-Java" data-language="Java"><code class="language-Java">&#123;
+&#125;</code></pre>
+<h3 id="size计算"><a href="#size计算" class="headerlink" title="size计算"></a>size计算</h3><pre class=" language-Java"><code class="language-Java">&#123;
     public int size() &#123;
-        long n &#x3D; sumCount();
-        return ((n &lt; 0L) ? 0 :
-                (n &gt; (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
+        long n = sumCount();
+        return ((n < 0L) ? 0 :
+                (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
                 (int)n);
     &#125;
 
     final long sumCount() &#123;
-        CounterCell[] as &#x3D; counterCells; CounterCell a;
-        long sum &#x3D; baseCount;
-        if (as !&#x3D; null) &#123;
-            for (int i &#x3D; 0; i &lt; as.length; ++i) &#123;
-                if ((a &#x3D; as[i]) !&#x3D; null)
-                    sum +&#x3D; a.value;
+        CounterCell[] as = counterCells; CounterCell a;
+        long sum = baseCount;
+        if (as != null) &#123;
+            for (int i = 0; i < as.length; ++i) &#123;
+                if ((a = as[i]) != null)
+                    sum += a.value;
             &#125;
         &#125;
         return sum;
     &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#125;</code></pre>
 <p>这里的逻辑也很简单：</p>
 <ol>
 <li>元素数量 = <code>baseCount</code> + <code>counterCells[]</code>中的每一个计数</li>
@@ -1064,7 +1061,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">2.1k</span>&nbsp;字
+                class="white-color">1.4k</span>&nbsp;字
             
             
             
