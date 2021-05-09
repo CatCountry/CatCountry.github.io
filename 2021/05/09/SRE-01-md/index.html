@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="leetcode-1-两数之和, 城猫的博客">
+    <meta name="keywords" content="SRE简介, 城猫的博客">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>leetcode-1-两数之和 | 城猫的博客</title>
+    <title>SRE简介 | 城猫的博客</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -203,12 +203,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/7.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/1.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">leetcode-1-两数之和</h1>
+                    <h1 class="description center-align post-title">SRE简介</h1>
                 </div>
             </div>
         </div>
@@ -324,12 +324,8 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/leetcode/">
-                                <span class="chip bg-color">leetcode</span>
-                            </a>
-                        
-                            <a href="/tags/N%E6%95%B0%E4%B9%8B%E5%92%8C/">
-                                <span class="chip bg-color">N数之和</span>
+                            <a href="/tags/SRE/">
+                                <span class="chip bg-color">SRE</span>
                             </a>
                         
                     </div>
@@ -340,8 +336,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/leetcode/" class="post-category">
-                                leetcode
+                            <a href="/categories/SRE/" class="post-category">
+                                SRE
                             </a>
                         
                     </div>
@@ -353,28 +349,28 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-02-20
+                    2021-05-09
                 </div>
                 
 
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2021-02-20
+                    2021-05-09
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    384
+                    1.8k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    1 分
+                    6 分
                 </div>
                 
 
@@ -394,46 +390,91 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="两数之和"><a href="#两数之和" class="headerlink" title="两数之和"></a>两数之和</h2><h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><p>给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 的那 两个 整数，并返回它们的数组下标。<br>可以假设每种输入只会对应一个答案。但是，数组中同一个元素不能使用两遍。<br>可以按任意顺序返回答案。 </p>
-<p>例子</p>
-<pre><code>输入：nums = [2,7,11,15], target = 9
-输出：[0,1]
-解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。</code></pre>
-<p>限制<br>2 &lt;= nums.length &lt;= 103<br>-109 &lt;= nums[i] &lt;= 109<br>-109 &lt;= target &lt;= 109<br>只会存在一个有效答案 </p>
-<h3 id="解法"><a href="#解法" class="headerlink" title="解法"></a>解法</h3><h4 id="1-暴力建立"><a href="#1-暴力建立" class="headerlink" title="1. 暴力建立"></a>1. 暴力建立</h4><p>暴力遍历是最容易想到的方案，整体时间复杂度是O（n^2）。<br>代码：</p>
-<pre class=" language-Java"><code class="language-Java">    public int[] twoSum(int[] nums, int target) &#123;
-        int[] results = new int[2];
-        for (int i = 0; i < nums.length; i++) &#123;
-            int j = i + 1;
-            while (j < nums.length) &#123;
-                if (nums[i] + nums[j] == target) &#123;
-                    results[0] = i;
-                    results[1] = j;
-                    return results;
-                &#125;
-                j ++;
-            &#125;
-        &#125;
-        return results;
-    &#125;</code></pre>
-<h4 id="2-哈希映射"><a href="#2-哈希映射" class="headerlink" title="2. 哈希映射"></a>2. 哈希映射</h4><p>将数组的值和index建立映射(时间复杂度为O(n))，然后遍历数组寻找<code>target - arr[i]</code>只需要O(1)的时间复杂度就可以找到是否存在另外的一个元素.<br>所以整体的时间复杂度为O(n);</p>
-<p>代码：</p>
-<pre class=" language-Java"><code class="language-Java">    public int[] twoSum(int[] nums, int target) &#123;
-        int[] results = new int[2];
-        Map<Integer, Integer> valueIndexMap = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) &#123;
-            valueIndexMap.put(nums[i], i);
-        &#125;
-        for (int i = 0; i < nums.length; i++) &#123;
-            Integer value = valueIndexMap.get(target - nums[i]);
-            if (value != null && value != i) &#123;
-                results[0] = i;
-                results[1] = value;
-                return results;
-            &#125;
-        &#125;
-        return results;
-    &#125;</code></pre>
+                <h1 id="SRE简介"><a href="#SRE简介" class="headerlink" title="SRE简介"></a>SRE简介</h1><blockquote>
+<p>站点可靠性工程师（Site Reliability Engineering）</p>
+</blockquote>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><h4 id="系统管理员模式"><a href="#系统管理员模式" class="headerlink" title="系统管理员模式"></a>系统管理员模式</h4><p><code>系统管理员</code>负责将现成的软件部署于生产环境，对外提供某种业务服务。<br>其主要工作是应付系统中产生的各种需要<strong>人工干预</strong>的事件已经业务部门的变更需求。</p>
+<p>系统管理员和研发工程师的日常工作相差甚远，通常属于两个部门：Dev和Ops</p>
+<p>Dev/Ops分离的问题：  </p>
+<ol>
+<li>直接成本<br>系统管理员团队依靠人工处理系统事件和实施变更，团队大小和系统规模线性相关</li>
+<li>间接成本<br>研发团队和运维团队背景不同，技术和工具相差甚远，同时工作目标也不相同。细节上的分歧积累起来，最后演变目标已经方向上的分歧，形成内部沟通问题，甚至上升到部门间的信任和尊重层面。</li>
+</ol>
+<p>研发部门和运维部门的主要分歧点在于软件新版本、新配置的变更的发布速度上。<br>研发部门希望发布速度越快越好‘随时随地发布新版本’，运维部门则希望避免发生故障‘系统在生产环境正常工作就不要再进行任何改动’</p>
+<h3 id="Google的解决之道：SRE"><a href="#Google的解决之道：SRE" class="headerlink" title="Google的解决之道：SRE"></a>Google的解决之道：SRE</h3><p>雇佣工程师开发系统代替人工操作<br>工程师主要有两类（或者说后一类为前一类的基础上有更多的知识背景）</p>
+<ol>
+<li>标准工程师</li>
+<li>其他技术能力（Unix系统或者网络知识背景） </li>
+</ol>
+<p>SRE团队成员有下面两个特点：</p>
+<ol>
+<li>排斥重复性、手工性的操作</li>
+<li>有足够的技术能力快速开发软件系统代替手工操作</li>
+</ol>
+<p>工作：</p>
+<ol>
+<li>工单处理、手工操作</li>
+<li>持续的、工程化的解决第一类工作</li>
+</ol>
+<p>Google为SRE团队所做的传统运维工作设立了一个50%的上限，随着第二类工作的推进，第一类的工作所占时间应该会逐步下降，目标是整个系统可以自主运行，可以自主修复问题（可以做到吗？）。</p>
+<p>职责：</p>
+<ol>
+<li>可用性改进</li>
+<li>延迟优化</li>
+<li>性能优化</li>
+<li>效率优化</li>
+<li>变更管理</li>
+<li>监控</li>
+<li>紧急事务处理</li>
+<li>容量规划与关联</li>
+</ol>
+<blockquote>
+<p>DevOps核心思想是尽早将IT相关技术与产品设计和开发过程相结合，着重强调自动化。可以认为是GoogleSRE的普适版本，SRE是DevOps在Google的具体实践。</p>
+</blockquote>
+<h4 id="SRE方法论"><a href="#SRE方法论" class="headerlink" title="SRE方法论"></a>SRE方法论</h4><ol>
+<li><p>确保长期关注研发工作<br>Google将传统运维工作的时间限制在50%，SRE团队将剩余的时间花费在研发项目上。</p>
+</li>
+<li><p>保障服务SLO前提下最大化迭代速度<br>SRE团队和研发团队的最主要矛盾是迭代创新的速度和产品的稳定程度。<br>“错误预算”是指任何产品都不是也不应该做到100%可靠。可靠性多少不是一个技术问题，而是一个产品问题，取决于下面几个方面：</p>
+<ul>
+<li>基于用户习惯，服务可靠性到达多少用户才会满意</li>
+<li>服务的可靠性不够，用户是否还有其他选择</li>
+<li>服务可靠程度是否影响用户对这个服务的使用模式  </li>
+</ul>
+<p>产品或者商业部门必须确定一个合理的可靠性目标。一旦建立，错误预算 = 1 - 可靠性目标。错误预算就意味着研发部门和SRE部门可以在这个范围内将这个预算用于新功能上线和产品创新等其他任何事情</p>
+<p>常用策略有：灰度测试和AB测试等</p>
+</li>
+<li><p>监控系统<br>监控系统是SRE团队监控服务质量和可用性的一个主要手段。监控系统的设计策略很重要，最普通和传统的报警策略是针对某个特定情况或者监控值，一旦出现情况或者超过阈值就触发报警。这个策略不是非常有效：一个需要人工阅读和分析警报来决定是否需要采取某些行动的系统从本质上来说是错误的。  </p>
+<p>监控系统不应该依赖人来分析警报信息，而是系统自动分析，仅当需要用户执行某种操作时，才需要通知。</p>
+<p>监考系统应该只有三类输出：</p>
+<ul>
+<li>紧急警报（alert）<br>意味着收到警报的用户需要立即执行某种操作，目标是解决某种已经发生的问题或者避免即将发生的问题</li>
+<li>工单（Ticket）<br>意味着收到工单的用户应该执行某种操作，但是并非立即执行。系统不能自动解决目前的情况，但是一个用户几天内执行这项操作，系统不会收到任何影响</li>
+<li>日志（Logging）<br>平时没有人关注日志信息，但是日志信息收集起来以备调试和事后分析时使用</li>
+</ul>
+</li>
+<li><p>紧急事件处理<br>可靠性是MTTF(平均失败时间)和MTTR(平均恢复时间)的函数。评价一个团队将系统恢复到正常情况的最有效指标就是MTTR.</p>
+<p>任何需要人工操作的事情都只会延长恢复时间。可以自动恢复的系统即使有更多故障发生，也比事事需要人工干预的系统可用性更高。</p>
+</li>
+<li><p>变更管理<br>大约70%的成产事故由某种部署变更而触发。变更管理最近实践是使用自动化完成以下几个项目：</p>
+<ul>
+<li>采用渐进式发布机制</li>
+<li>迅速准确地检测到问题的发生</li>
+<li>出现问题时，安全迅速地回退改动</li>
+</ul>
+</li>
+<li><p>容量规划<br>业务容量规划包含自然增长（用户使用量上升，资源也上升），非自然增长（新功能发布以及其他商业因素）<br>步骤：</p>
+<ul>
+<li>准确的自然增长需求预测模型</li>
+<li>规划中必须有准确的非自然增长的需求来源的统计</li>
+<li>必须有周期性压力测试，以便将系统原始资源信息和业务容量对应起来</li>
+</ul>
+</li>
+<li><p>资源部署<br>是变更管理和容量规划结合的产物。资源的部署和配置必须非常迅速的完成，仅仅在必要时才执行。</p>
+</li>
+<li><p>效率与性能<br>资源使用情况由用户需求（流量）、可用容量和软件的资源使用效率所驱动的。<br>SRE目标是根据一个预设的延迟目标部署和维护足够的容量。SRE和研发团队应该共同监控和优化整个系统的性能，相当于给服务增加容量和提示效率。</p>
+</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>GoogleSRE代表了行业现存管理大型复杂服务的最佳实践，由简单的想法“如何应发重复劳动的办法”而生，发展成具有指导思想、方法论、激励方法和广阔发展空间的独立职业。</p>
 
                 
             </div>
@@ -460,7 +501,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://poeadist.com/2021/02/20/leetcode-1-%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C/">https://poeadist.com/2021/02/20/leetcode-1-%E4%B8%A4%E6%95%B0%E4%B9%8B%E5%92%8C/</a>
+                    <a href="https://poeadist.com/2021/05/09/SRE-01-md/">https://poeadist.com/2021/05/09/SRE-01-md/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -498,12 +539,8 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/leetcode/">
-                                    <span class="chip bg-color">leetcode</span>
-                                </a>
-                            
-                                <a href="/tags/N%E6%95%B0%E4%B9%8B%E5%92%8C/">
-                                    <span class="chip bg-color">N数之和</span>
+                                <a href="/tags/SRE/">
+                                    <span class="chip bg-color">SRE</span>
                                 </a>
                             
                         </div>
@@ -546,17 +583,18 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
-                <a href="/2021/03/02/SpringTranscation/">
+                <a href="/2021/05/09/SRE-01-md/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="SpringTranscation">
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="SRE简介">
                         
-                        <span class="card-title">SpringTranscation</span>
+                        <span class="card-title">SRE简介</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -566,16 +604,29 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-03-02
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-09
+                            </span>
                         <span class="publish-author">
                             
-                            <i class="fas fa-user fa-fw"></i>
-                            CatCountry
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/SRE/" class="post-category">
+                                    SRE
+                                </a>
+                            
                             
                         </span>
                     </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/SRE/">
+                        <span class="chip bg-color">SRE</span>
+                    </a>
+                    
                 </div>
                 
             </div>
@@ -587,13 +638,13 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2021/01/24/spring-01/">
+                <a href="/2021/03/21/ConcurrentHashMap/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="spring-01">
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="ConcurrentHashMap">
                         
-                        <span class="card-title">spring-01</span>
+                        <span class="card-title">ConcurrentHashMap</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -604,14 +655,14 @@
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-01-24
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-03-21
                             </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Spring/" class="post-category">
-                                    Spring
+                            <a href="/categories/Java/" class="post-category">
+                                    Java
                                 </a>
                             
                             
@@ -621,8 +672,12 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Spring/">
-                        <span class="chip bg-color">Spring</span>
+                    <a href="/tags/HashMap/">
+                        <span class="chip bg-color">HashMap</span>
+                    </a>
+                    
+                    <a href="/tags/JDK/">
+                        <span class="chip bg-color">JDK</span>
                     </a>
                     
                 </div>
