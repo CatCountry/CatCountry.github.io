@@ -326,6 +326,7 @@
   }
   
   .cm-s-inner .CodeMirror-line::selection,
+  .cm-s-inner .CodeMirror-line::selection,
   .cm-s-inner .CodeMirror-line > span::selection,
   .cm-s-inner .CodeMirror-line > span > span::selection {
     background-color: rgba(167, 178, 189, 0.2);

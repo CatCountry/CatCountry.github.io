@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="ConcurrentHashMap, 城猫的博客">
+    <meta name="keywords" content="压测问题与思考, 城猫的博客">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>ConcurrentHashMap | 城猫的博客</title>
+    <title>压测问题与思考 | 城猫的博客</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -203,12 +203,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/23.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">ConcurrentHashMap</h1>
+                    <h1 class="description center-align post-title">压测问题与思考</h1>
                 </div>
             </div>
         </div>
@@ -324,27 +324,14 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/HashMap/">
-                                <span class="chip bg-color">HashMap</span>
-                            </a>
-                        
-                            <a href="/tags/JDK/">
-                                <span class="chip bg-color">JDK</span>
+                            <a href="/tags/%E5%8E%8B%E6%B5%8B/">
+                                <span class="chip bg-color">压测</span>
                             </a>
                         
                     </div>
                     
                 </div>
                 <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/Java/" class="post-category">
-                                Java
-                            </a>
-                        
-                    </div>
                     
                 </div>
             </div>
@@ -353,28 +340,28 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-03-21
+                    2021-05-22
                 </div>
                 
 
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2021-03-21
+                    2021-05-22
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1k
+                    1.6k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    4 分
+                    6 分
                 </div>
                 
 
@@ -394,293 +381,171 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><hr>
-<p>本文讨论的是1.8版本的代码,如果存在错误，欢迎指出。</p>
-<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>首先在多线程环境下，会出现<code>读-写</code>、<code>读-读</code>和<code>写-写</code>操作冲突。</p>
-<p>其次对于<code>Map</code>中的常用API：</p>
-<p>写:</p>
-<pre class=" language-Java"><code class="language-Java">&#123;
-    V put(K key, V value);
-
-    V remove(Object key);
-&#125;</code></pre>
-<p>读：</p>
-<pre class=" language-Java"><code class="language-Java">&#123;
-    int size();
-
-    boolean isEmpty();
-
-    boolean containsKey(Object key);
-
-    V get(Object key);
-
-    Set<K> keySet();
-
-    Set<Map.Entry<K, V>> entrySet();
-
-    Collection<V> values();
-&#125;</code></pre>
-<p>这些API中大致可以了解到<code>ConcurrentHashMap</code>需要维护三类数据的同步</p>
+                <blockquote>
+<p>对于项目压测过程中的问题和思考总结做一个简单的记录。  </p>
+</blockquote>
+<h2 id="压测问题与思考"><a href="#压测问题与思考" class="headerlink" title="压测问题与思考"></a>压测问题与思考</h2><p><strong>问题：</strong>  </p>
 <ol>
-<li>size</li>
-<li>Entry</li>
-<li>EntrySet</li>
+<li>代码问题：for循环中加载数据</li>
+<li>SpringBoot没有足够的了解</li>
+<li>线程池配置</li>
+<li>缓存（雪崩）问题</li>
+<li>服务治理问题</li>
 </ol>
-<p>接下来我们一个一个讨论。</p>
-<h2 id="size"><a href="#size" class="headerlink" title="size"></a>size</h2><p>可以先看下<code>ConcurrentHashMap</code>的关于数量的成员变量：</p>
-<pre class=" language-Java"><code class="language-Java">&#123;
-    //基础计数器 volatile
-    private transient volatile long baseCount;
-    //lockObject volatile
-    private transient volatile int cellsBusy;
-    //出现冲突后的计数器 volatile
-    private transient volatile CounterCell[] counterCells;
-
-    @sun.misc.Contended 
-    static final class CounterCell &#123;
-        volatile long value;
-        CounterCell(long x) &#123; value = x; &#125;
-    &#125;
-&#125;</code></pre>
-<p>计数总体上是依靠<code>CAS</code>完成数据的更新。</p>
+<p><strong>思考总结🤔 ：</strong>  </p>
 <ol>
-<li>首先更新<code>baseCount</code></li>
-<li>如果更新出现冲突，则初始化<code>countCells[]</code>数组，将冲突的可能性降低</li>
-<li>获取Map中元素数量时，返回<code>baseCount</code>和<code>countCells[]</code>的总和；</li>
+<li>强大的监控系统能够提高压测效率。</li>
+<li>SpringBoot自动配置足够强大和傻瓜化，但是我们需要对于引入了什么组件以及做了什么配置有充分的了解（防止出现问题）。</li>
+<li>for循环加载数据的两个优化方向：<code>异步化</code>和<code>批量加载</code></li>
+<li>线程池很常见，要明白系统中哪里用到了线程池以及这个地方的线程池配置是否合理。</li>
+<li>服务治理问题很重要，依赖其他服务的接口可能会让你的服务崩溃。</li>
 </ol>
-<h3 id="size增加的情况"><a href="#size增加的情况" class="headerlink" title="size增加的情况"></a>size增加的情况</h3><p>通过<code>put()</code>增加元素</p>
-<pre class=" language-Java"><code class="language-Java">&#123;
-    public V put(K key, V value) &#123;
-        return putVal(key, value, false);
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li>k8s</li>
+<li>istio</li>
+<li>jaeger</li>
+<li>MySQL</li>
+<li>Redis（Cluster）</li>
+<li>ES</li>
+</ul>
+<h2 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h2><p>涉及到两个服务A和B，服务A为本次压测目标，服务A弱依赖与服务B.</p>
+<blockquote>
+<p>下面是测试过程中出现的问题</p>
+</blockquote>
+<h2 id="nginx超时问题"><a href="#nginx超时问题" class="headerlink" title="nginx超时问题"></a>nginx超时问题</h2><p>之前压测时，压测机器和服务都是在K8s环境内部调用，没有暴露出这个问题。这次压测，测试选择Windows机器调用服务域名，但是因为出现ng超时,导致后续一段时间内持续报错。<br><strong>解决方案：</strong><br>通过nodeport类型的service暴露出端口，供压测使用。</p>
+<blockquote>
+<p>这个问题还是性能问题，选择直接优化代码或者调大超时时间都是可选项。我们不想打断一轮压测，选择了当前的解决方案</p>
+</blockquote>
+<h2 id="循环内部加载数据"><a href="#循环内部加载数据" class="headerlink" title="循环内部加载数据"></a>循环内部加载数据</h2><p>代码内部有存在循环内部加载数据的逻辑，伪代码如下</p>
+<pre class=" language-Java"><code class="language-Java">public List<UserDto> loadUsers(List<String> ids) &#123;
+  List<User> userList = new ArrayList<>();
+  for (String id : ids) &#123;
+    User user = getByCache(id);
+    if (user != null) &#123;
+      user = getByDb(id);
     &#125;
-
-    final V putVal(K key, V value, boolean onlyIfAbsent) &#123;
-        //**********
-        //先忽略其他代码
-        //下面的方法会将总数量+1， binCount和扩容有关，可以先忽略
-        addCount(1L, binCount);
-        return null;
+    if (user != null) &#123;
+      userList.add(user);
     &#125;
-
-    private final void addCount(long x, int check) &#123;
-        CounterCell[] as; long b, s;
-        if ((as = counterCells) != null ||
-            !U.compareAndSwapLong(this, BASECOUNT, b = baseCount, s = b + x)) &#123;
-            //1.counterCells已经初始化
-            //2.更新baseCount失败（发送冲突）
-            //上面任何一种情况发生，都会进入到这里 
-            CounterCell a; long v; int m;
-            boolean uncontended = true;
-            // ThreadLocalRandom.getProbe() 获取线程的随机数，用于分散锁冲突
-            if (as == null || (m = as.length - 1) < 0 ||
-                (a = as[ThreadLocalRandom.getProbe() & m]) == null ||
-                !(uncontended = U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))) &#123;
-                // 发生下面的情况
-                //1.counterCells未初始化
-                //2.counterCells[index] 没有初始化
-                //3.counterCells[index] 更新失败
-                fullAddCount(x, uncontended);
-                return;
-            &#125;
-            if (check <= 1)
-                return;
-            s = sumCount();
-        &#125;
-        if (check >= 0) &#123;
-            //扩容逻辑，先暂时忽略
-        &#125;
-    &#125;
-
-    private final void fullAddCount(long x, boolean wasUncontended) &#123;
-        int h;
-        if ((h = ThreadLocalRandom.getProbe()) == 0) &#123;
-            //当前线程的随机数还没有初始化
-            //进行初始化
-            ThreadLocalRandom.localInit();      // force initialization
-            h = ThreadLocalRandom.getProbe();
-            wasUncontended = true;
-        &#125;
-        boolean collide = false;                // True if last slot nonempty
-        for (;;) &#123;
-            CounterCell[] as; CounterCell a; int n; long v;
-            if ((as = counterCells) != null && (n = as.length) > 0) &#123;
-                //counterCells[] 已经初始化
-                if ((a = as[(n - 1) & h]) == null) &#123;
-                    // counterCells[index]没有初始化
-                    if (cellsBusy == 0) &#123;            // Try to attach new Cell
-                        CounterCell r = new CounterCell(x); // Optimistic create
-                        if (cellsBusy == 0 && U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                            // 只有拿到了cellsBusy的锁(CAS)才能进入这里
-                            boolean created = false;
-                            try &#123;               // Recheck under lock
-                                CounterCell[] rs; int m, j;
-                                // 针对counterCells[index]没有初始化，创建新的CounterCell
-                                if ((rs = counterCells) != null &&
-                                    (m = rs.length) > 0 &&
-                                    rs[j = (m - 1) & h] == null) &#123;
-                                    rs[j] = r;
-                                    created = true;
-                                &#125;
-                            &#125; finally &#123;
-                                //创建成功，是否锁
-                                cellsBusy = 0;
-                            &#125;
-                            if (created)
-                                break;
-                            //竞争cellsBusy锁失败，重试
-                            continue;           // Slot is now non-empty
-                        &#125;
-                    &#125;
-                    collide = false;
-                &#125;
-                //CAS失败，第一次肯定会跳过
-                else if (!wasUncontended)       // CAS already known to fail
-                    wasUncontended = true;      // Continue after rehash
-                //直接尝试在counterCells[index]增加数量
-                else if (U.compareAndSwapLong(a, CELLVALUE, v = a.value, v + x))
-                    break;
-                //更新counterCells[index]失败，说明又出现了冲突
-                else if (counterCells != as || n >= NCPU)、
-                    //如果counterCells扩容过 或者 counterCells数量大于CPU数量，则认为不需要扩容了
-                    collide = false;            // At max size or stale
-                else if (!collide)
-                     //到了这一步说明需要继续扩容counterCells
-                    collide = true;
-                else if (cellsBusy == 0 &&
-                         U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                    //对counterCells进行扩容，需要拿到CELLSBUSY的锁
-                    try &#123;
-                        if (counterCells == as) &#123;// Expand table unless stale
-                            CounterCell[] rs = new CounterCell[n << 1];
-                            for (int i = 0; i < n; ++i)
-                                rs[i] = as[i];
-                            counterCells = rs;
-                        &#125;
-                    &#125; finally &#123;
-                        cellsBusy = 0;
-                    &#125;
-                    collide = false;
-                    continue;                   // Retry with expanded table
-                &#125;
-                //重新设置线程的随机数
-                h = ThreadLocalRandom.advanceProbe(h);
-            &#125;
-            else if (cellsBusy == 0 && counterCells == as &&
-                     U.compareAndSwapInt(this, CELLSBUSY, 0, 1)) &#123;
-                //counterCells[] 没有初始化，进行初始化
-                boolean init = false;
-                try &#123;                           // Initialize table
-                    if (counterCells == as) &#123;
-                        CounterCell[] rs = new CounterCell[2];
-                        rs[h & 1] = new CounterCell(x);
-                        counterCells = rs;
-                        init = true;
-                    &#125;
-                &#125; finally &#123;
-                    cellsBusy = 0;
-                &#125;
-                if (init)
-                    break;
-            &#125;
-            //如果都失败了，则回退到更新 BASECOUNT
-            else if (U.compareAndSwapLong(this, BASECOUNT, v = baseCount, v + x))
-                break;                          // Fall back on using base
-        &#125;
-    &#125;
+  &#125;
+  return toDtoList(userList);
 &#125;</code></pre>
-<p>上面的代码还是比较简单的，</p>
-<ul>
-<li>首先通过<code>CAS</code>更新<code>baseCount</code>的值,如果</li>
-<li><ul>
-<li>更新成功，代码执行完成</li>
-</ul>
-</li>
-<li><ul>
-<li>更新失败，认为发生了冲突。然后会获取<code>cellsBusy</code>锁，初始化<code>countCells[]</code>数组</li>
-</ul>
-</li>
-<li>下次再次增加元素时，由于<code>countCells[]</code>数组已经初始化，一般不会更新<code>baseCount</code>的值了</li>
-<li><ul>
-<li>选择<code>countCells[]</code>一个槽位（线程随机数）进行增加操作（这样减少了冲突的概率）</li>
-</ul>
-</li>
-<li><ul>
-<li><ul>
-<li>如果当前槽位没有初始化，则会获取<code>cellsBusy</code>锁，进行初始化</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><ul>
-<li><ul>
-<li><code>cas</code>当前槽位的值进行增加操作</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><ul>
-<li><ul>
-<li><ul>
-<li>更新成功，退出代码</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><ul>
-<li><ul>
-<li><ul>
-<li>更新失败，说明出现了冲突，进行扩容操作（<code>countCells[]</code>数组长度最多为大于CPU核数的最近一个2^n的一个数）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>在这里<code>cellsBusy</code>的作用是用于初始化和创建CounterCell的锁</p>
-<h3 id="size减少的情况"><a href="#size减少的情况" class="headerlink" title="size减少的情况"></a>size减少的情况</h3><p>通过<code>remove()</code>移除元素</p>
-<pre class=" language-Java"><code class="language-Java">&#123;
-    public V remove(Object key) &#123;
-        return replaceNode(key, null, null);
+<h4 id="第一步考虑优化的方案是异步化"><a href="#第一步考虑优化的方案是异步化" class="headerlink" title="第一步考虑优化的方案是异步化"></a>第一步考虑优化的方案是异步化</h4><pre class=" language-Java"><code class="language-Java">public List<UserDto> loadUsers(List<String> ids) &#123;
+  List<User> userList = new ArrayList<>();
+  List<Future<User>> futures = new ArrayList<>();
+  for (String id : ids) &#123;
+    futures.add(ayncGetUser(id));
+  &#125;
+  for (Future<User> future : futures) &#123;
+    try &#123;
+      userList.add(future.get());
+    &#125; catch (Exception ex) &#123;
+      todo xxx
     &#125;
-
-    final V replaceNode(Object key, V value, Object cv) &#123;
-        //******
-        //忽略其他代码
-        //移除元素的逻辑和👆上面是一致的
-        addCount(-1L, -1);
-        //******
-    &#125;
+  &#125;
+  return toDtoList(userList);
 &#125;</code></pre>
-<h3 id="size计算"><a href="#size计算" class="headerlink" title="size计算"></a>size计算</h3><pre class=" language-Java"><code class="language-Java">&#123;
-    public int size() &#123;
-        long n = sumCount();
-        return ((n < 0L) ? 0 :
-                (n > (long)Integer.MAX_VALUE) ? Integer.MAX_VALUE :
-                (int)n);
+<p>压测结果显示效果不理想。<br>我的想法是：异步化能够提高一定的吞吐量，但是在高负载的情况下，大量的任务在队列中等待执行，导致了压测结果的不理想。</p>
+<p><img src="1.jpg"></p>
+<blockquote>
+<p>在当前场景下异步化的作用并不大</p>
+</blockquote>
+<h4 id="第二步考虑优化的方案是批量获取"><a href="#第二步考虑优化的方案是批量获取" class="headerlink" title="第二步考虑优化的方案是批量获取"></a>第二步考虑优化的方案是批量获取</h4><p>Redis Cluster模式下<code>mget</code>命令是无法直接获取到所有的key(如果分布到不同的机器上)对应的内容的，但是客户端做了一些优化，帮助我们使用这个命令。  </p>
+<p>Jedis Client</p>
+<pre class=" language-Java"><code class="language-Java">//JedisClusterStringCommands
+    @Override
+    public List<byte[]> mGet(byte[]... keys) &#123;
+
+        Assert.notNull(keys, "Keys must not be null!");
+        Assert.noNullElements(keys, "Keys must not contain null elements!");
+    //如果所有的key在同一个slot内，一个connection可以直接执行
+        if (ClusterSlotHashUtil.isSameSlotForAllKeys(keys)) &#123;
+            return connection.getCluster().mget(keys);
+        &#125;
+    //否则需要多个connection执行
+        return connection.getClusterCommandExecutor()
+        //对应代码在下面
+                .executeMultiKeyCommand((JedisMultiKeyClusterCommandCallback<byte[]>) BinaryJedis::get, Arrays.asList(keys))
+                .resultsAsListSortBy(keys);
     &#125;
 
-    final long sumCount() &#123;
-        CounterCell[] as = counterCells; CounterCell a;
-        long sum = baseCount;
-        if (as != null) &#123;
-            for (int i = 0; i < as.length; ++i) &#123;
-                if ((a = as[i]) != null)
-                    sum += a.value;
+  public <S, T> MultiNodeResult<T> executeMultiKeyCommand(MultiKeyClusterCommandCallback<S, T> cmd, Iterable<byte[]> keys) &#123;
+    //keys分布的节点
+        Map<RedisClusterNode, PositionalKeys> nodeKeyMap = new HashMap<>();
+
+        int index = 0;
+        for (byte[] key : keys) &#123;
+      //每个key对应的节点
+            for (RedisClusterNode node : getClusterTopology().getKeyServingNodes(key)) &#123;
+                nodeKeyMap.computeIfAbsent(node, val -> PositionalKeys.empty()).append(PositionalKey.of(key, index++));
             &#125;
         &#125;
-        return sum;
-    &#125;
+
+        Map<NodeExecution, Future<NodeResult<T>>> futures = new LinkedHashMap<>();
+        for (Entry<RedisClusterNode, PositionalKeys> entry : nodeKeyMap.entrySet()) &#123;
+            if (entry.getKey().isMaster()) &#123;
+                for (PositionalKey key : entry.getValue()) &#123;
+          //加载到执行线程池内去执行
+                    futures.put(new NodeExecution(entry.getKey(), key), executor.submit(() -> executeMultiKeyCommandOnSingleNode(cmd, entry.getKey(), key.getBytes())));
+                &#125;
+            &#125;
+        &#125;
+
+        return collectResults(futures);
 &#125;</code></pre>
-<p>这里的逻辑也很简单：</p>
+<p>lettuce client</p>
+<pre class=" language-Java"><code class="language-Java">    @Override
+    public RedisFuture<List<KeyValue<K, V>>> mget(Iterable<K> keys) &#123;
+        //计算keys分布的slot
+        Map<Integer, List<K>> partitioned = SlotHash.partition(codec, keys);
+        //如果全部分布在同一个slot上
+        if (partitioned.size() < 2) &#123;
+            return super.mget(keys);
+        &#125;
+
+        Map<K, Integer> slots = SlotHash.getSlots(partitioned);
+        Map<Integer, RedisFuture<List<KeyValue<K, V>>>> executions = new HashMap<>();
+
+        for (Map.Entry<Integer, List<K>> entry : partitioned.entrySet()) &#123;
+            RedisFuture<List<KeyValue<K, V>>> mget = super.mget(entry.getValue());
+            //每一个slot 对应的mget
+            executions.put(entry.getKey(), mget);
+        &#125;
+
+        // restore order of key
+        return new PipelinedRedisFuture<>(executions, objectPipelinedRedisFuture -> &#123;
+            List<KeyValue<K, V>> result = new ArrayList<>();
+            for (K opKey : keys) &#123;
+                int slot = slots.get(opKey);
+
+                int position = partitioned.get(slot).indexOf(opKey);
+                RedisFuture<List<KeyValue<K, V>>> listRedisFuture = executions.get(slot);
+                result.add(MultiNodeExecution.execute(() -> listRedisFuture.get().get(position)));
+            &#125;
+
+            return result;
+        &#125;);
+    &#125;</code></pre>
+<p>我们需要做的事就是两件事了：  </p>
 <ol>
-<li>元素数量 = <code>baseCount</code> + <code>counterCells[]</code>中的每一个计数</li>
-<li>如果<code>counterCells[]</code>没有初始化，那么<code>baseCount</code>是通过<code>CAS</code>增加的，就是现在状态下的元素数量；</li>
-<li>这里有一个问题是代码中没有对于<code>counterCells[]</code>的访问加锁，计算数量期间可能又会有元素被添加，所以这种情况下返回的总数是不准确的，只是一个估算值。</li>
+<li>缓存的key放在同一个槽内<br>Redis支持设置 <code>HashTag</code> 来保证分布在相同的slot内，比如下面的key:<br><code>pre_&#123;key:1&#125;_user_1</code>,<code>pre_&#123;key:1&#125;_user_2</code>, <code>pre_&#123;key:1&#125;_user_3</code></li>
+<li>db操作批量获取</li>
 </ol>
-<p>//TODO</p>
+<p>我们的接口都是按照租户ID来获取信息，所以Redis可以通过设置一个租户id来保证一次网络请求批量获取key。</p>
+<h2 id="Redis客户端"><a href="#Redis客户端" class="headerlink" title="Redis客户端"></a>Redis客户端</h2><p>Redis的客户端主要是<code>Jedis</code>和<code>lettuce</code>,两者在<code>连接</code>上有很大的区别，<br>jedis的连接不是线程安全的每个操作需要独享一个连接<br>lettuce的连接时线程安全的所有命令可以共用一个连接，更推荐使用连接池</p>
+<p>基于我本次压测的观察：<br>配置了连接池的lettuce在压测表现上远优与Jedis</p>
+<h2 id="监控系统对于压测效率的提升"><a href="#监控系统对于压测效率的提升" class="headerlink" title="监控系统对于压测效率的提升"></a>监控系统对于压测效率的提升</h2><p>刚开始压测的情况下环境内是没有Jeager的，所以发现问题是很困难的，需要对于每一个请求手动打埋点日志，整体过程让人焦虑而且效率低下。<br>后来部署了Jaeger之后，很容易发现链路中的问题，下图是一个链路的示意图（包含DB、Redis和请求操作）</p>
+<p><img src="2.jpg"></p>
+<p>很轻松发现服务中的问题。</p>
+<h2 id="连接池问题"><a href="#连接池问题" class="headerlink" title="连接池问题"></a>连接池问题</h2><ol>
+<li>Tomcat连接池</li>
+<li>Db连接池</li>
+<li>redis连接池</li>
+</ol>
+<p>Tomcat连接池使用了SpringBoot自带的配置，不是服务的压测瓶颈<br>Redis连接池在比较了Jedis和lettuce之后，选择了lettuce<br>Db连接池使用的是Druid  </p>
+<h2 id="服务治理问题"><a href="#服务治理问题" class="headerlink" title="服务治理问题"></a>服务治理问题</h2><p>公司的规划是使用istio来做服务间接口的限流和熔断，但是这部分功能还没有落地，应用内部目前也没有做这些功能。<br>就像上面的Trace一样，虽然做了降级（调用失败会走MQ）,但是A服务还是被B服务拖垮。</p>
+<h2 id="缓存问题"><a href="#缓存问题" class="headerlink" title="缓存问题"></a>缓存问题</h2><p>压测环境配置的缓存过期时间比较短，会出现所有缓存都失效的情况，这时所有的请求都打到DB上，服务整体性能严重下降，而且DB的CPU偏高。<br>新版本上线可能会出现这种问题，这个还是需要DevOPS一起找出一个解决方案。</p>
+<p>今天就到这吧</p>
 
                 
             </div>
@@ -707,7 +572,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://poeadist.com/2021/03/21/ConcurrentHashMap/">https://poeadist.com/2021/03/21/ConcurrentHashMap/</a>
+                    <a href="https://poeadist.com/2021/05/22/press-thinking/">https://poeadist.com/2021/05/22/press-thinking/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -745,12 +610,8 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/HashMap/">
-                                    <span class="chip bg-color">HashMap</span>
-                                </a>
-                            
-                                <a href="/tags/JDK/">
-                                    <span class="chip bg-color">JDK</span>
+                                <a href="/tags/%E5%8E%8B%E6%B5%8B/">
+                                    <span class="chip bg-color">压测</span>
                                 </a>
                             
                         </div>
@@ -793,9 +654,56 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2021/05/22/press-thinking/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="压测问题与思考">
+                        
+                        <span class="card-title">压测问题与思考</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-22
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            CatCountry
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E5%8E%8B%E6%B5%8B/">
+                        <span class="chip bg-color">压测</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
             <div class="card">
                 <a href="/2021/05/09/SRE-01-md/">
                     <div class="card-image">
@@ -813,9 +721,9 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-05-09
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-09
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -835,43 +743,6 @@
                         <span class="chip bg-color">SRE</span>
                     </a>
                     
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2021/03/02/SpringTranscation/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="SpringTranscation">
-                        
-                        <span class="card-title">SpringTranscation</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-03-02
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-user fa-fw"></i>
-                            CatCountry
-                            
-                        </span>
-                    </div>
                 </div>
                 
             </div>
