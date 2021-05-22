@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="压测问题与思考, 城猫的博客">
+    <meta name="keywords" content="SRE-monitor, 城猫的博客">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>压测问题与思考 | 城猫的博客</title>
+    <title>SRE-monitor | 城猫的博客</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -203,12 +203,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/2.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/3.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">压测问题与思考</h1>
+                    <h1 class="description center-align post-title">SRE-monitor</h1>
                 </div>
             </div>
         </div>
@@ -324,14 +324,27 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/%E5%8E%8B%E6%B5%8B/">
-                                <span class="chip bg-color">压测</span>
+                            <a href="/tags/SRE/">
+                                <span class="chip bg-color">SRE</span>
+                            </a>
+                        
+                            <a href="/tags/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">
+                                <span class="chip bg-color">监控系统</span>
                             </a>
                         
                     </div>
                     
                 </div>
                 <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/SRE/" class="post-category">
+                                SRE
+                            </a>
+                        
+                    </div>
                     
                 </div>
             </div>
@@ -354,14 +367,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.6k
+                    972
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    6 分
+                    3 分
                 </div>
                 
 
@@ -381,171 +394,71 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <blockquote>
-<p>对于项目压测过程中的问题和思考总结做一个简单的记录。  </p>
+                <p>SRE指导思想之系统监控  </p>
+<blockquote>
+<p>Google SRE团队在构建监控体系和报警系统方面遵循一些核心思想和最佳实践</p>
 </blockquote>
-<h2 id="压测问题与思考"><a href="#压测问题与思考" class="headerlink" title="压测问题与思考"></a>压测问题与思考</h2><p><strong>问题：</strong>  </p>
-<ol>
-<li>代码问题：for循环中加载数据</li>
-<li>SpringBoot没有足够的了解</li>
-<li>线程池配置</li>
-<li>缓存（雪崩）问题</li>
-<li>服务治理问题</li>
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><ol>
+<li><strong>监控(monitoring)</strong><br>收集、处理、汇总和展示系统的实时量化指标</li>
+<li><strong>白盒监控</strong><br>依靠系统内部暴露的一些性能指标进行监控</li>
+<li><strong>黑盒监控</strong><br>通过测试某种外部用户可见的系统进行监控</li>
+<li><strong>监控台页面</strong><br>展示服务核心指标的应用程序</li>
+<li><strong>警报</strong><br>目标是某个人发向某个系统（Email\短信等）的通知</li>
+<li><strong>根源问题</strong><br>系统中的某种缺陷</li>
+<li><strong>节点或者机器</strong><br>物理机、虚拟机或者容器内运行的代码实例</li>
+<li><strong>推送</strong><br>关于某个服务正在运行的软件或者配置文件的任何改动（不明白这是在指哪个过程）</li>
 </ol>
-<p><strong>思考总结🤔 ：</strong>  </p>
-<ol>
-<li>强大的监控系统能够提高压测效率。</li>
-<li>SpringBoot自动配置足够强大和傻瓜化，但是我们需要对于引入了什么组件以及做了什么配置有充分的了解（防止出现问题）。</li>
-<li>for循环加载数据的两个优化方向：<code>异步化</code>和<code>批量加载</code></li>
-<li>线程池很常见，要明白系统中哪里用到了线程池以及这个地方的线程池配置是否合理。</li>
-<li>服务治理问题很重要，依赖其他服务的接口可能会让你的服务崩溃。</li>
-</ol>
-<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
-<li>k8s</li>
-<li>istio</li>
-<li>jaeger</li>
-<li>MySQL</li>
-<li>Redis（Cluster）</li>
-<li>ES</li>
+<h2 id="为什么需要监控"><a href="#为什么需要监控" class="headerlink" title="为什么需要监控"></a>为什么需要监控</h2><ul>
+<li>分析长期趋势</li>
+<li>时间范围或者对照组的区别  <ul>
+<li>新版本更新的影响（时间范围）</li>
+<li>AB测试组对照（对照组）</li>
 </ul>
-<h2 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h2><p>涉及到两个服务A和B，服务A为本次压测目标，服务A弱依赖与服务B.</p>
+</li>
+<li>报警<ul>
+<li>某项东西即将出现故障</li>
+<li>某项东西已经出现故障</li>
+</ul>
+</li>
+<li>服务指标展示<br>控制台页面能够回答有关服务的一些基本问题，包括后面的4个黄金指标</li>
+</ul>
 <blockquote>
-<p>下面是测试过程中出现的问题</p>
+<p>避免<code>狼来了</code>效应：紧急报警会占用程序员的宝贵时间，频繁的报警会容易让人忽略掉正在发生的故障。同时无效信息太多，分析修复会变慢，故障时间增加。高效的警报系统应该提供足够的信息，并且较低的误报。</p>
 </blockquote>
-<h2 id="nginx超时问题"><a href="#nginx超时问题" class="headerlink" title="nginx超时问题"></a>nginx超时问题</h2><p>之前压测时，压测机器和服务都是在K8s环境内部调用，没有暴露出这个问题。这次压测，测试选择Windows机器调用服务域名，但是因为出现ng超时,导致后续一段时间内持续报错。<br><strong>解决方案：</strong><br>通过nodeport类型的service暴露出端口，供压测使用。</p>
-<blockquote>
-<p>这个问题还是性能问题，选择直接优化代码或者调大超时时间都是可选项。我们不想打断一轮压测，选择了当前的解决方案</p>
-</blockquote>
-<h2 id="循环内部加载数据"><a href="#循环内部加载数据" class="headerlink" title="循环内部加载数据"></a>循环内部加载数据</h2><p>代码内部有存在循环内部加载数据的逻辑，伪代码如下</p>
-<pre class=" language-Java"><code class="language-Java">public List<UserDto> loadUsers(List<String> ids) &#123;
-  List<User> userList = new ArrayList<>();
-  for (String id : ids) &#123;
-    User user = getByCache(id);
-    if (user != null) &#123;
-      user = getByDb(id);
-    &#125;
-    if (user != null) &#123;
-      userList.add(user);
-    &#125;
-  &#125;
-  return toDtoList(userList);
-&#125;</code></pre>
-<h4 id="第一步考虑优化的方案是异步化"><a href="#第一步考虑优化的方案是异步化" class="headerlink" title="第一步考虑优化的方案是异步化"></a>第一步考虑优化的方案是异步化</h4><pre class=" language-Java"><code class="language-Java">public List<UserDto> loadUsers(List<String> ids) &#123;
-  List<User> userList = new ArrayList<>();
-  List<Future<User>> futures = new ArrayList<>();
-  for (String id : ids) &#123;
-    futures.add(ayncGetUser(id));
-  &#125;
-  for (Future<User> future : futures) &#123;
-    try &#123;
-      userList.add(future.get());
-    &#125; catch (Exception ex) &#123;
-      todo xxx
-    &#125;
-  &#125;
-  return toDtoList(userList);
-&#125;</code></pre>
-<p>压测结果显示效果不理想。<br>我的想法是：异步化能够提高一定的吞吐量，但是在高负载的情况下，大量的任务在队列中等待执行，导致了压测结果的不理想。</p>
-<p><img src="1.jpg"></p>
-<blockquote>
-<p>在当前场景下异步化的作用并不大</p>
-</blockquote>
-<h4 id="第二步考虑优化的方案是批量获取"><a href="#第二步考虑优化的方案是批量获取" class="headerlink" title="第二步考虑优化的方案是批量获取"></a>第二步考虑优化的方案是批量获取</h4><p>Redis Cluster模式下<code>mget</code>命令是无法直接获取到所有的key(如果分布到不同的机器上)对应的内容的，但是客户端做了一些优化，帮助我们使用这个命令。  </p>
-<p>Jedis Client</p>
-<pre class=" language-Java"><code class="language-Java">//JedisClusterStringCommands
-    @Override
-    public List<byte[]> mGet(byte[]... keys) &#123;
-
-        Assert.notNull(keys, "Keys must not be null!");
-        Assert.noNullElements(keys, "Keys must not contain null elements!");
-    //如果所有的key在同一个slot内，一个connection可以直接执行
-        if (ClusterSlotHashUtil.isSameSlotForAllKeys(keys)) &#123;
-            return connection.getCluster().mget(keys);
-        &#125;
-    //否则需要多个connection执行
-        return connection.getClusterCommandExecutor()
-        //对应代码在下面
-                .executeMultiKeyCommand((JedisMultiKeyClusterCommandCallback<byte[]>) BinaryJedis::get, Arrays.asList(keys))
-                .resultsAsListSortBy(keys);
-    &#125;
-
-  public <S, T> MultiNodeResult<T> executeMultiKeyCommand(MultiKeyClusterCommandCallback<S, T> cmd, Iterable<byte[]> keys) &#123;
-    //keys分布的节点
-        Map<RedisClusterNode, PositionalKeys> nodeKeyMap = new HashMap<>();
-
-        int index = 0;
-        for (byte[] key : keys) &#123;
-      //每个key对应的节点
-            for (RedisClusterNode node : getClusterTopology().getKeyServingNodes(key)) &#123;
-                nodeKeyMap.computeIfAbsent(node, val -> PositionalKeys.empty()).append(PositionalKey.of(key, index++));
-            &#125;
-        &#125;
-
-        Map<NodeExecution, Future<NodeResult<T>>> futures = new LinkedHashMap<>();
-        for (Entry<RedisClusterNode, PositionalKeys> entry : nodeKeyMap.entrySet()) &#123;
-            if (entry.getKey().isMaster()) &#123;
-                for (PositionalKey key : entry.getValue()) &#123;
-          //加载到执行线程池内去执行
-                    futures.put(new NodeExecution(entry.getKey(), key), executor.submit(() -> executeMultiKeyCommandOnSingleNode(cmd, entry.getKey(), key.getBytes())));
-                &#125;
-            &#125;
-        &#125;
-
-        return collectResults(futures);
-&#125;</code></pre>
-<p>lettuce client</p>
-<pre class=" language-Java"><code class="language-Java">    @Override
-    public RedisFuture<List<KeyValue<K, V>>> mget(Iterable<K> keys) &#123;
-        //计算keys分布的slot
-        Map<Integer, List<K>> partitioned = SlotHash.partition(codec, keys);
-        //如果全部分布在同一个slot上
-        if (partitioned.size() < 2) &#123;
-            return super.mget(keys);
-        &#125;
-
-        Map<K, Integer> slots = SlotHash.getSlots(partitioned);
-        Map<Integer, RedisFuture<List<KeyValue<K, V>>>> executions = new HashMap<>();
-
-        for (Map.Entry<Integer, List<K>> entry : partitioned.entrySet()) &#123;
-            RedisFuture<List<KeyValue<K, V>>> mget = super.mget(entry.getValue());
-            //每一个slot 对应的mget
-            executions.put(entry.getKey(), mget);
-        &#125;
-
-        // restore order of key
-        return new PipelinedRedisFuture<>(executions, objectPipelinedRedisFuture -> &#123;
-            List<KeyValue<K, V>> result = new ArrayList<>();
-            for (K opKey : keys) &#123;
-                int slot = slots.get(opKey);
-
-                int position = partitioned.get(slot).indexOf(opKey);
-                RedisFuture<List<KeyValue<K, V>>> listRedisFuture = executions.get(slot);
-                result.add(MultiNodeExecution.execute(() -> listRedisFuture.get().get(position)));
-            &#125;
-
-            return result;
-        &#125;);
-    &#125;</code></pre>
-<p>我们需要做的事就是两件事了：  </p>
+<h2 id="监控的作用"><a href="#监控的作用" class="headerlink" title="监控的作用"></a>监控的作用</h2><p>监控系统应该解决两个问题：</p>
 <ol>
-<li>缓存的key放在同一个槽内<br>Redis支持设置 <code>HashTag</code> 来保证分布在相同的slot内，比如下面的key:<br><code>pre_&#123;key:1&#125;_user_1</code>,<code>pre_&#123;key:1&#125;_user_2</code>, <code>pre_&#123;key:1&#125;_user_3</code></li>
-<li>db操作批量获取</li>
+<li>现象：哪里出现了故障？</li>
+<li>原因：为什么出现故障？</li>
 </ol>
-<p>我们的接口都是按照租户ID来获取信息，所以Redis可以通过设置一个租户id来保证一次网络请求批量获取key。</p>
-<h2 id="Redis客户端"><a href="#Redis客户端" class="headerlink" title="Redis客户端"></a>Redis客户端</h2><p>Redis的客户端主要是<code>Jedis</code>和<code>lettuce</code>,两者在<code>连接</code>上有很大的区别，<br>jedis的连接不是线程安全的每个操作需要独享一个连接<br>lettuce的连接时线程安全的所有命令可以共用一个连接，更推荐使用连接池</p>
-<p>基于我本次压测的观察：<br>配置了连接池的lettuce在压测表现上远优与Jedis</p>
-<h2 id="监控系统对于压测效率的提升"><a href="#监控系统对于压测效率的提升" class="headerlink" title="监控系统对于压测效率的提升"></a>监控系统对于压测效率的提升</h2><p>刚开始压测的情况下环境内是没有Jeager的，所以发现问题是很困难的，需要对于每一个请求手动打埋点日志，整体过程让人焦虑而且效率低下。<br>后来部署了Jaeger之后，很容易发现链路中的问题，下图是一个链路的示意图（包含DB、Redis和请求操作）</p>
-<p><img src="2.jpg"></p>
-<p>很轻松发现服务中的问题。</p>
-<h2 id="连接池问题"><a href="#连接池问题" class="headerlink" title="连接池问题"></a>连接池问题</h2><ol>
-<li>Tomcat连接池</li>
-<li>Db连接池</li>
-<li>redis连接池</li>
+<p><code>这一点看起来很难啊，该如何去做呢？现象很容易发现，怎么通过现象自动发现原因，甚至直接定位到根本问题上？可能依赖于多方面的日志和指标的综合考虑</code></p>
+<h2 id="黑盒与白盒监控"><a href="#黑盒与白盒监控" class="headerlink" title="黑盒与白盒监控"></a>黑盒与白盒监控</h2><p>黑盒监控是面向现象，代表正在发生的问题（不是即将发生的）<br>白盒监控大量依赖系统内部信息的检测（系统日志、指标信息），可以检测到即将发生的问题或者问题的根源。</p>
+<h2 id="4个黄金指标"><a href="#4个黄金指标" class="headerlink" title="4个黄金指标"></a>4个黄金指标</h2><blockquote>
+<p>4个最重要的指标</p>
+</blockquote>
+<ol>
+<li><strong>延迟</strong><br>服务器处理某个请求（区分成功请求和失败请求）所需的时间。  </li>
 </ol>
-<p>Tomcat连接池使用了SpringBoot自带的配置，不是服务的压测瓶颈<br>Redis连接池在比较了Jedis和lettuce之后，选择了lettuce<br>Db连接池使用的是Druid  </p>
-<h2 id="服务治理问题"><a href="#服务治理问题" class="headerlink" title="服务治理问题"></a>服务治理问题</h2><p>公司的规划是使用istio来做服务间接口的限流和熔断，但是这部分功能还没有落地，应用内部目前也没有做这些功能。<br>就像上面的Trace一样，虽然做了降级（调用失败会走MQ）,但是A服务还是被B服务拖垮。</p>
-<h2 id="缓存问题"><a href="#缓存问题" class="headerlink" title="缓存问题"></a>缓存问题</h2><p>压测环境配置的缓存过期时间比较短，会出现所有缓存都失效的情况，这时所有的请求都打到DB上，服务整体性能严重下降，而且DB的CPU偏高。<br>新版本上线可能会出现这种问题，这个还是需要DevOPS一起找出一个解决方案。</p>
-<p>今天就到这吧</p>
+<ol start="2">
+<li><p><strong>流量</strong><br>对系统负载进行的高层次度量指标。通常是HTTP请求数量</p>
+</li>
+<li><p><strong>错误</strong><br>请求失败的数量和速率。</p>
+<blockquote>
+<p>错误分为两种错误：显式错误如HTTP 500错误；隐式错误指HTTP状态码为200，但在响应体内包装了错误信息。前者在负载均衡上就可以检测到，后者则需要应用自身检测。</p>
+</blockquote>
+</li>
+<li><p><strong>饱和度</strong><br>系统中通用资源的某些具体指标的度量，如磁盘、CPU和内存等等。</p>
+</li>
+</ol>
+<h2 id="长尾问题"><a href="#长尾问题" class="headerlink" title="长尾问题"></a>长尾问题</h2><p>构建监控系统时，警惕某些量化指标的平均值。如延迟平均值，可能会存在少量请求贡献了极高的延迟。<br>区分平均值的‘慢’和长尾值的‘慢’的一个最简单方法就是按照延迟分组计数。</p>
+<h2 id="度量指标选择合适精度"><a href="#度量指标选择合适精度" class="headerlink" title="度量指标选择合适精度"></a>度量指标选择合适精度</h2><p>系统不同部分应该以不同精度进行度量  </p>
+<ul>
+<li>较长的时间精度可能会丢失少量突发的负载上升</li>
+<li>较短的时间精度会增加收集、存储和分析的成本</li>
+</ul>
+<p>如果监控目标需要高精度的数据，可以通过内部采样机制外部汇总的方式降低成本。</p>
+<blockquote>
+<p>最近在思考和实践如何做系统的监控和报警，希望能借鉴到Google的一些经验。</p>
+</blockquote>
 
                 
             </div>
@@ -572,7 +485,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://poeadist.com/2021/05/22/press-thinking/">https://poeadist.com/2021/05/22/press-thinking/</a>
+                    <a href="https://poeadist.com/2021/05/22/SRE-monitor/">https://poeadist.com/2021/05/22/SRE-monitor/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -610,8 +523,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/%E5%8E%8B%E6%B5%8B/">
-                                    <span class="chip bg-color">压测</span>
+                                <a href="/tags/SRE/">
+                                    <span class="chip bg-color">SRE</span>
+                                </a>
+                            
+                                <a href="/tags/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">
+                                    <span class="chip bg-color">监控系统</span>
                                 </a>
                             
                         </div>
@@ -654,9 +571,10 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
                 <a href="/2021/05/22/SRE-monitor/">
                     <div class="card-image">
@@ -674,9 +592,9 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-05-22
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-22
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -689,6 +607,7 @@
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -711,13 +630,13 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2021/05/09/SRE-01-md/">
+                <a href="/2021/05/22/press-thinking/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="SRE简介">
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="压测问题与思考">
                         
-                        <span class="card-title">SRE简介</span>
+                        <span class="card-title">压测问题与思考</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -728,16 +647,12 @@
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-09
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-22
                             </span>
                         <span class="publish-author">
                             
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/SRE/" class="post-category">
-                                    SRE
-                                </a>
-                            
+                            <i class="fas fa-user fa-fw"></i>
+                            CatCountry
                             
                         </span>
                     </div>
@@ -745,8 +660,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/SRE/">
-                        <span class="chip bg-color">SRE</span>
+                    <a href="/tags/%E5%8E%8B%E6%B5%8B/">
+                        <span class="chip bg-color">压测</span>
                     </a>
                     
                 </div>
