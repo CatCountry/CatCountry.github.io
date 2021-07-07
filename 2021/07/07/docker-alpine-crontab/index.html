@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="SRE-monitor, 城猫的博客">
+    <meta name="keywords" content="docker-alpine-crontab, 城猫的博客">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -16,7 +16,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>SRE-monitor | 城猫的博客</title>
+    <title>docker-alpine-crontab | 城猫的博客</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -203,12 +203,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/3.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">SRE-monitor</h1>
+                    <h1 class="description center-align post-title">docker-alpine-crontab</h1>
                 </div>
             </div>
         </div>
@@ -324,27 +324,18 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/SRE/">
-                                <span class="chip bg-color">SRE</span>
+                            <a href="/tags/k8s/">
+                                <span class="chip bg-color">k8s</span>
                             </a>
                         
-                            <a href="/tags/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">
-                                <span class="chip bg-color">监控系统</span>
+                            <a href="/tags/crontab/">
+                                <span class="chip bg-color">crontab</span>
                             </a>
                         
                     </div>
                     
                 </div>
                 <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/SRE/" class="post-category">
-                                SRE
-                            </a>
-                        
-                    </div>
                     
                 </div>
             </div>
@@ -353,28 +344,28 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-05-22
+                    2021-07-07
                 </div>
                 
 
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2021-05-22
+                    2021-07-07
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    972
+                    206
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    3 分
+                    1 分
                 </div>
                 
 
@@ -394,71 +385,15 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>SRE指导思想之系统监控  </p>
-<blockquote>
-<p>Google SRE团队在构建监控体系和报警系统方面遵循一些核心思想和最佳实践</p>
-</blockquote>
-<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><ol>
-<li><strong>监控(monitoring)</strong><br>收集、处理、汇总和展示系统的实时量化指标</li>
-<li><strong>白盒监控</strong><br>依靠系统内部暴露的一些性能指标进行监控</li>
-<li><strong>黑盒监控</strong><br>通过测试某种外部用户可见的系统进行监控</li>
-<li><strong>监控台页面</strong><br>展示服务核心指标的应用程序</li>
-<li><strong>警报</strong><br>目标是某个人发向某个系统（Email\短信等）的通知</li>
-<li><strong>根源问题</strong><br>系统中的某种缺陷</li>
-<li><strong>节点或者机器</strong><br>物理机、虚拟机或者容器内运行的代码实例</li>
-<li><strong>推送</strong><br>关于某个服务正在运行的软件或者配置文件的任何改动（不明白这是在指哪个过程）</li>
-</ol>
-<h2 id="为什么需要监控"><a href="#为什么需要监控" class="headerlink" title="为什么需要监控"></a>为什么需要监控</h2><ul>
-<li>分析长期趋势</li>
-<li>时间范围或者对照组的区别  <ul>
-<li>新版本更新的影响（时间范围）</li>
-<li>AB测试组对照（对照组）</li>
-</ul>
-</li>
-<li>报警<ul>
-<li>某项东西即将出现故障</li>
-<li>某项东西已经出现故障</li>
-</ul>
-</li>
-<li>服务指标展示<br>控制台页面能够回答有关服务的一些基本问题，包括后面的4个黄金指标</li>
-</ul>
-<blockquote>
-<p>避免<code>狼来了</code>效应：紧急报警会占用程序员的宝贵时间，频繁的报警会容易让人忽略掉正在发生的故障。同时无效信息太多，分析修复会变慢，故障时间增加。高效的警报系统应该提供足够的信息，并且较低的误报。</p>
-</blockquote>
-<h2 id="监控的作用"><a href="#监控的作用" class="headerlink" title="监控的作用"></a>监控的作用</h2><p>监控系统应该解决两个问题：</p>
-<ol>
-<li>现象：哪里出现了故障？</li>
-<li>原因：为什么出现故障？</li>
-</ol>
-<p><code>这一点看起来很难啊，该如何去做呢？现象很容易发现，怎么通过现象自动发现原因，甚至直接定位到根本问题上？可能依赖于多方面的日志和指标的综合考虑</code></p>
-<h2 id="黑盒与白盒监控"><a href="#黑盒与白盒监控" class="headerlink" title="黑盒与白盒监控"></a>黑盒与白盒监控</h2><p>黑盒监控是面向现象，代表正在发生的问题（不是即将发生的）<br>白盒监控大量依赖系统内部信息的检测（系统日志、指标信息），可以检测到即将发生的问题或者问题的根源。</p>
-<h2 id="4个黄金指标"><a href="#4个黄金指标" class="headerlink" title="4个黄金指标"></a>4个黄金指标</h2><blockquote>
-<p>4个最重要的指标</p>
-</blockquote>
-<ol>
-<li><strong>延迟</strong><br>服务器处理某个请求（区分成功请求和失败请求）所需的时间。  </li>
-</ol>
-<ol start="2">
-<li><p><strong>流量</strong><br>对系统负载进行的高层次度量指标。通常是HTTP请求数量</p>
-</li>
-<li><p><strong>错误</strong><br>请求失败的数量和速率。</p>
-<blockquote>
-<p>错误分为两种错误：显式错误如HTTP 500错误；隐式错误指HTTP状态码为200，但在响应体内包装了错误信息。前者在负载均衡上就可以检测到，后者则需要应用自身检测。</p>
-</blockquote>
-</li>
-<li><p><strong>饱和度</strong><br>系统中通用资源的某些具体指标的度量，如磁盘、CPU和内存等等。</p>
-</li>
-</ol>
-<h2 id="长尾问题"><a href="#长尾问题" class="headerlink" title="长尾问题"></a>长尾问题</h2><p>构建监控系统时，警惕某些量化指标的平均值。如延迟平均值，可能会存在少量请求贡献了极高的延迟。<br>区分平均值的‘慢’和长尾值的‘慢’的一个最简单方法就是按照延迟分组计数。</p>
-<h2 id="度量指标选择合适精度"><a href="#度量指标选择合适精度" class="headerlink" title="度量指标选择合适精度"></a>度量指标选择合适精度</h2><p>系统不同部分应该以不同精度进行度量  </p>
-<ul>
-<li>较长的时间精度可能会丢失少量突发的负载上升</li>
-<li>较短的时间精度会增加收集、存储和分析的成本</li>
-</ul>
-<p>如果监控目标需要高精度的数据，可以通过内部采样机制外部汇总的方式降低成本。</p>
-<blockquote>
-<p>最近在思考和实践如何做系统的监控和报警，希望能借鉴到Google的一些经验。</p>
-</blockquote>
+                <h2 id="Docker中alpine镜像crontab使用"><a href="#Docker中alpine镜像crontab使用" class="headerlink" title="Docker中alpine镜像crontab使用"></a>Docker中alpine镜像crontab使用</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>线上做数据迁移时，出现了一次Pod被驱逐的情况，导致迁移任务执行一半，需要手工重新执行。<br>查看k8s的日志情况，发现是日志打印太多，导致机器内可用存储不足，所以pod被驱逐了。<br>现有情况下，不能动态修改日志级别，并且不想修改重新打包。所以决定使用crontab，定时删除以前的日志。</p>
+<h3 id="增加crontab"><a href="#增加crontab" class="headerlink" title="增加crontab"></a>增加crontab</h3><pre><code># echo &quot;find /data/data/logs/ -type f -mmin +30 -print -delete&quot; &gt; /data/clear-log.sh
+# crontab -e
+*/15    *       *       *       *       sh /data/clear-log.sh</code></pre>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>发现crontab没有执行，在网上看到下面的方案：<br><code>alpine内嵌的是BusyBox，使用alpine的crontab实际就是使用BusyBox的crond服务</code></p>
+<pre class=" language-sh"><code class="language-sh"># crond
+# ps | grep cond
+  274 root      0:00 grep cond</code></pre>
+<p>任务正常开始执行</p>
 
                 
             </div>
@@ -485,7 +420,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://poeadist.com/2021/05/22/SRE-monitor/">https://poeadist.com/2021/05/22/SRE-monitor/</a>
+                    <a href="https://poeadist.com/2021/07/07/docker-alpine-crontab/">https://poeadist.com/2021/07/07/docker-alpine-crontab/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -523,12 +458,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/SRE/">
-                                    <span class="chip bg-color">SRE</span>
+                                <a href="/tags/k8s/">
+                                    <span class="chip bg-color">k8s</span>
                                 </a>
                             
-                                <a href="/tags/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">
-                                    <span class="chip bg-color">监控系统</span>
+                                <a href="/tags/crontab/">
+                                    <span class="chip bg-color">crontab</span>
                                 </a>
                             
                         </div>
@@ -571,9 +506,60 @@
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2021/07/07/docker-alpine-crontab/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="docker-alpine-crontab">
+                        
+                        <span class="card-title">docker-alpine-crontab</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-07-07
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            CatCountry
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/k8s/">
+                        <span class="chip bg-color">k8s</span>
+                    </a>
+                    
+                    <a href="/tags/crontab/">
+                        <span class="chip bg-color">crontab</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
             <div class="card">
                 <a href="/2021/06/02/tini-usage/">
                     <div class="card-image">
@@ -591,9 +577,9 @@
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-06-02
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2021-06-02
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -615,55 +601,6 @@
                     
                     <a href="/tags/tini/">
                         <span class="chip bg-color">tini</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2021/05/22/press-thinking/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="压测问题与思考">
-                        
-                        <span class="card-title">压测问题与思考</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-05-22
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/SRE/" class="post-category">
-                                    SRE
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/%E5%8E%8B%E6%B5%8B/">
-                        <span class="chip bg-color">压测</span>
                     </a>
                     
                 </div>
