@@ -21,7 +21,6 @@ tags: ['k8s', 'crontab']
 `alpine内嵌的是BusyBox，使用alpine的crontab实际就是使用BusyBox的crond服务`
 ```sh
 # crond
-# ps | grep cond
-  274 root      0:00 grep cond
+# ps | grep crond
 ```
 任务正常开始执行
