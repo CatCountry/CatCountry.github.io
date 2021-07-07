@@ -358,7 +358,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    206
+                    200
                 </div>
                 
 
@@ -391,8 +391,7 @@
 */15    *       *       *       *       sh /data/clear-log.sh</code></pre>
 <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>发现crontab没有执行，在网上看到下面的方案：<br><code>alpine内嵌的是BusyBox，使用alpine的crontab实际就是使用BusyBox的crond服务</code></p>
 <pre class=" language-sh"><code class="language-sh"># crond
-# ps | grep cond
-  274 root      0:00 grep cond</code></pre>
+# ps | grep crond</code></pre>
 <p>任务正常开始执行</p>
 
                 
